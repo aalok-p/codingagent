@@ -1,4 +1,8 @@
 ## Codebase Patterns
+- Render deployment: use `render.yaml` Blueprint for backend Docker + PostgreSQL provisioning; health check path is /health
+- Vercel deployment: use `vercel.json` with SPA rewrites for React Router; Vite framework preset; env vars via VITE_ prefix
+- CORS: configurable via `CORS_ORIGINS` env var (comma-separated); defaults to `*` for local development
+- Frontend API URL: all axios instances read `import.meta.env.VITE_API_URL` with `http://localhost:8000` fallback
 - Alembic env.py must override `sqlalchemy.url` from DATABASE_URL env var for Docker/CI compatibility
 - Backend Dockerfile uses ENTRYPOINT with shell script that runs `alembic upgrade head` then `exec uvicorn`
 - Analytics queries use SQLAlchemy `func.sum`, `func.count`, `func.coalesce` for aggregation scoped to `seller_id`
@@ -94,4 +98,22 @@
 - Added CSS for seller complaints panel (complaint-card, complaint-card-header, etc.)
 - Build and lint pass without errors
 - Manual browser verification needed for UI pages
+---
+## [Sat Jun 20 2026] - US-016
+- Created render.yaml for Render Blueprint deployment (backend Docker + PostgreSQL database)
+- Created frontend/vercel.json with SPA rewrites for React Router client-side routing
+- Made CORS origins configurable via CORS_ORIGINS env var (comma-separated, defaults to *)
+- Created frontend/.env.example documenting VITE_API_URL and VITE_GOOGLE_CLIENT_ID
+- Updated backend/.env.example with CORS_ORIGINS variable
+- Backend typecheck, frontend lint, and frontend build all pass clean
+- **Learnings for future iterations:**
+  - Render Blueprint (render.yaml) supports infrastructure-as-code: define services, databases, env vars, and health checks in one file
+  - For SPA hosting on Vercel, rewrites are essential to avoid 404 on direct URL access to React Router routes
+  - The `VITE_` prefix is required by Vite for client-side env vars — VITE_API_URL and VITE_GOOGLE_CLIENT_ID must be set during build
+  - CORS origins should be a comma-separated env var to support multiple origins (local dev + production)
+  - `CORS_ORIGINS=*` keeps permissive mode for development; a specific URL locks it down for production
+  - The axios baseURL pattern (`import.meta.env.VITE_API_URL || 'http://localhost:8000'`) works for both local dev and Vercel-deployed builds
+  - Vercel uses `npm ci` and `npm run build` by default — verify these work before deploying
+  - Render Docker service health checks must match the app's health endpoint (/health)
+  - Actual deployment (pushing to GitHub and connecting Render/Vercel) requires Render and Vercel accounts with repo access; this iteration provides the config files
 ---
