@@ -1,5 +1,7 @@
 import random
 
+from datetime import datetime
+
 from pydantic import BaseModel, field_validator
 
 
@@ -56,11 +58,11 @@ class ProductResponse(BaseModel):
     price: float
     quantity: int
     seller_id: int
-    created_at: str
-    updated_at: str
+    created_at: datetime
+    updated_at: datetime
 
     model_config = {"from_attributes": True}
 
 
 def generate_sui_number() -> int:
-    return random.randint(10**7, 10**12 - 1)
+    return random.randint(10**7, 10**9 - 1)
