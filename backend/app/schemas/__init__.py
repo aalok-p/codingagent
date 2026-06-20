@@ -6,6 +6,7 @@ from app.schemas.auth import (
     SignupRequest,
     TokenResponse,
 )
+from app.schemas.product import ProductCreate, ProductResponse, ProductUpdate
 
 __all__ = [
     "SignupRequest",
@@ -14,4 +15,7 @@ __all__ = [
     "GoogleLoginRequest",
     "GoogleAuthResponse",
     "RoleUpdateRequest",
+    "ProductCreate",
+    "ProductUpdate",
+    "ProductResponse",
 ]
