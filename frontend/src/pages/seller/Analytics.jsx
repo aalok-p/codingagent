@@ -27,6 +27,7 @@ export default function SellerAnalytics() {
         <div className="seller-nav">
           <Link to="/seller/products" className="btn-link">Products</Link>
           <Link to="/seller/analytics" className="btn-link btn-link-active">Analytics</Link>
+          <Link to="/seller/complaints" className="btn-link">Complaints</Link>
         </div>
       </div>
 

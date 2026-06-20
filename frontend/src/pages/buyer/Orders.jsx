@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getOrders } from '../../api/orders';
+import { fileComplaint } from '../../api/complaints';
 import { useToast } from '../../components/Toast';
 import { useNavigate } from 'react-router-dom';
 
@@ -53,11 +54,17 @@ export default function BuyerOrders() {
     setComplaintMsg('');
   }
 
-  function handleFileComplaint(e) {
+  async function handleFileComplaint(e) {
     e.preventDefault();
-    toast('Complaint submitted successfully');
-    setComplaintModal(null);
-    setComplaintMsg('');
+    try {
+      await fileComplaint(complaintModal.id, complaintMsg);
+      toast('Complaint submitted successfully');
+      setComplaintModal(null);
+      setComplaintMsg('');
+    } catch (err) {
+      const msg = err.response?.data?.detail || 'Failed to submit complaint';
+      toast(msg, 'error');
+    }
   }
 
   if (loading) return <div className="page-loading">Loading...</div>;

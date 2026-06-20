@@ -113,6 +113,7 @@ export default function SellerProducts() {
         <div className="seller-nav">
           <Link to="/seller/products" className="btn-link btn-link-active">Products</Link>
           <Link to="/seller/analytics" className="btn-link">Analytics</Link>
+          <Link to="/seller/complaints" className="btn-link">Complaints</Link>
           <button className="btn-primary btn-small" onClick={openAdd}>
             + Add Product
           </button>

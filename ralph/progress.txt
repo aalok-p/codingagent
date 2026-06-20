@@ -8,6 +8,8 @@
 - Protected routes via `<ProtectedRoute>` wrapper in App.jsx reading localStorage
 - All CSS class patterns: `.btn-primary`, `.btn-small`, `.btn-secondary`, `.btn-icon`, `.modal-overlay`, `.modal`, `.modal-actions`, `.form-group`, `.empty-state`, `.page-loading`, `stock-badge`/`stock-high`/`stock-medium`/`stock-low`
 - Backend orders already return items with `product_name` in GET /orders response
+- New routers need to be registered in both the import and include_router sections of main.py + schemas exported in schemas/__init__.py
+- Complaints API endpoints: POST /complaints (buyer), GET /complaints/seller (seller), PATCH /complaints/{id}/resolve (seller)
 
 ## [Sat Jun 20 2026] - US-010
 - Implemented buyer order history page with expandable order cards
@@ -47,5 +49,30 @@
   - When adding new seller pages, add the nav link in both Products.jsx and Analytics.jsx headers
   - The `seller-header` + `seller-nav` CSS classes are shared between seller pages
   - No TypeScript typecheck needed for this project (plain JSX + Vite)
-  - Manual browser verification needed for UI pages
+   - Manual browser verification needed for UI pages
+---
+## [Sat Jun 20 2026] - US-013
+- Implemented complaints API with 3 endpoints
+- POST /complaints — buyer only; validates order_item exists, customer exists, no duplicate complaint per order item; creates complaint linked to product and customer
+- GET /seller/complaints — seller only; returns complaints on seller's products with product name, customer name, message, status, created_at; ordered by newest first
+- PATCH /complaints/{id}/resolve — seller only; validates complaint exists, belongs to seller's product, not already resolved; sets status to "resolved"
+- Created app/schemas/complaint.py with ComplaintCreate, ComplaintResponse, SellerComplaintResponse
+- Created app/routers/complaints.py with role-based access control
+- Registered complaints router in app/main.py and schemas in __init__.py
+- **Learnings for future iterations:**
+  - Complaint model has a one-to-one relationship with order_item (uselist=False) — enforce no duplicate complaints per order_item
+  - The complaints router uses /complaints prefix for buyer endpoints and /complaints/seller for seller-specific listing — consistent with the /seller prefix pattern
+  - Enforce that customer must exist (i.e., user must have placed an order) before allowing complaint filing
+  - New router registration requires 3 steps: create router file, add import + include_router in main.py, export schemas in __init__.py
+---
+## [Sat Jun 20 2026] - US-014
+- Implemented complaints UI: buyer complaint submission + seller complaints panel
+- Created src/api/complaints.js with fileComplaint(), getSellerComplaints(), resolveComplaint() following existing API module pattern (axios + auth interceptor)
+- Wired up buyer complaint form modal in Orders.jsx to POST /complaints with error handling
+- Created src/pages/seller/Complaints.jsx with complaints list showing product name, customer name, message, status badge, and Resolve button
+- Added /seller/complaints route in App.jsx
+- Added Complaints navigation link in Products.jsx and Analytics.jsx seller headers
+- Added CSS for seller complaints panel (complaint-card, complaint-card-header, etc.)
+- Build and lint pass without errors
+- Manual browser verification needed for UI pages
 ---
