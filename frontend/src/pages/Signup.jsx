@@ -35,9 +35,9 @@ export default function Signup() {
     setLoading(true);
     try {
       const data = await signup(fullName, email, phone, password, role);
-      localStorage.setItem('token', data.access_token);
-      localStorage.setItem('userId', data.user_id);
-      localStorage.setItem('role', data.role);
+      sessionStorage.setItem('token', data.access_token);
+      sessionStorage.setItem('userId', data.user_id);
+      sessionStorage.setItem('role', data.role);
       navigate(data.role === 'seller' ? '/seller/products' : '/buyer/products');
     } catch (err) {
       const msg = err.response?.data?.detail || 'Signup failed. Please try again.';

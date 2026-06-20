@@ -30,9 +30,9 @@ export default function Login() {
     setLoading(true);
     try {
       const data = await login(email, password);
-      localStorage.setItem('token', data.access_token);
-      localStorage.setItem('userId', data.user_id);
-      localStorage.setItem('role', data.role);
+      sessionStorage.setItem('token', data.access_token);
+      sessionStorage.setItem('userId', data.user_id);
+      sessionStorage.setItem('role', data.role);
       navigate(data.role === 'seller' ? '/seller/products' : '/buyer/products');
     } catch (err) {
       const msg = err.response?.data?.detail || 'Login failed. Please try again.';
@@ -45,9 +45,9 @@ export default function Login() {
   async function handleGoogleSuccess(credentialResponse) {
     try {
       const data = await googleLogin(credentialResponse.credential);
-      localStorage.setItem('token', data.access_token);
-      localStorage.setItem('userId', data.user_id);
-      localStorage.setItem('role', data.role);
+      sessionStorage.setItem('token', data.access_token);
+      sessionStorage.setItem('userId', data.user_id);
+      sessionStorage.setItem('role', data.role);
       if (data.role_pending) {
         navigate('/role-picker');
       } else {

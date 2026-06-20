@@ -16,8 +16,8 @@ import './App.css';
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
 function ProtectedRoute({ children, requiredRole }) {
-  const token = localStorage.getItem('token');
-  const role = localStorage.getItem('role');
+  const token = sessionStorage.getItem('token');
+  const role = sessionStorage.getItem('role');
   if (!token) return <Navigate to="/" replace />;
   if (requiredRole && role !== requiredRole) return <Navigate to="/" replace />;
   return children;

@@ -12,8 +12,8 @@ export default function RolePicker() {
     setError('');
     try {
       const data = await updateRole(role);
-      localStorage.setItem('token', data.access_token);
-      localStorage.setItem('role', data.role);
+      sessionStorage.setItem('token', data.access_token);
+      sessionStorage.setItem('role', data.role);
       navigate(role === 'seller' ? '/seller/products' : '/buyer/products');
     } catch (err) {
       const msg = err.response?.data?.detail || 'Failed to set role. Please try again.';
