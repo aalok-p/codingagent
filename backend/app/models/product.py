@@ -15,6 +15,7 @@ class Product(Base):
     sui_number: Mapped[int] = mapped_column(Integer, unique=True, nullable=False, index=True)
     price: Mapped[float] = mapped_column(Float, nullable=False)
     quantity: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    category: Mapped[str | None] = mapped_column(String(100), nullable=True)
     seller_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

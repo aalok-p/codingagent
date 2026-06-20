@@ -5,7 +5,9 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import RolePicker from './pages/RolePicker';
 import SellerProducts from './pages/seller/Products';
+import BuyerProducts from './pages/buyer/Products';
 import { ToastProvider } from './components/ToastProvider';
+import { CartProvider } from './context/CartProvider';
 import './App.css';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
@@ -39,7 +41,9 @@ function App() {
             path="/buyer/products"
             element={
               <ProtectedRoute requiredRole="buyer">
-                <h1>Buyer Products (coming soon)</h1>
+                <CartProvider>
+                  <BuyerProducts />
+                </CartProvider>
               </ProtectedRoute>
             }
           />

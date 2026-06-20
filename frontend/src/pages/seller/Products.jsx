@@ -8,7 +8,7 @@ export default function SellerProducts() {
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(null);
   const [deleting, setDeleting] = useState(null);
-  const [form, setForm] = useState({ name: '', sku: '', price: '', quantity: '' });
+  const [form, setForm] = useState({ name: '', sku: '', category: '', price: '', quantity: '' });
   const [formErrors, setFormErrors] = useState({});
   const [saving, setSaving] = useState(false);
   const toast = useToast();
@@ -21,11 +21,11 @@ export default function SellerProducts() {
     }).finally(() => {
       setLoading(false);
     });
-  }, []);
+  }, [toast]);
 
   function openAdd() {
     setEditing(null);
-    setForm({ name: '', sku: '', price: '', quantity: '' });
+    setForm({ name: '', sku: '', category: '', price: '', quantity: '' });
     setFormErrors({});
     setShowModal(true);
   }
@@ -35,6 +35,7 @@ export default function SellerProducts() {
     setForm({
       name: product.name,
       sku: product.sku,
+      category: product.category || '',
       price: String(product.price),
       quantity: String(product.quantity),
     });
@@ -62,6 +63,7 @@ export default function SellerProducts() {
       const payload = {
         name: form.name.trim(),
         sku: form.sku.trim(),
+        category: form.category.trim() || undefined,
         price: Number(form.price),
         quantity: Number(form.quantity),
       };
@@ -123,6 +125,7 @@ export default function SellerProducts() {
               <tr>
                 <th>Name</th>
                 <th>SKU</th>
+                <th>Category</th>
                 <th>SUI Number</th>
                 <th>Price</th>
                 <th>Stock</th>
@@ -134,6 +137,7 @@ export default function SellerProducts() {
                 <tr key={p.id}>
                   <td className="product-name-cell">{p.name}</td>
                   <td><code>{p.sku}</code></td>
+                  <td>{p.category || <span style={{ opacity: 0.5 }}>—</span>}</td>
                   <td><code>{p.sui_number}</code></td>
                   <td>${Number(p.price).toFixed(2)}</td>
                   <td>
@@ -178,6 +182,14 @@ export default function SellerProducts() {
                   className={formErrors.sku ? 'input-error' : ''}
                 />
                 {formErrors.sku && <span className="field-error">{formErrors.sku}</span>}
+              </div>
+              <div className="form-group">
+                <label>Category</label>
+                <input
+                  value={form.category}
+                  onChange={(e) => setForm({ ...form, category: e.target.value })}
+                  placeholder="e.g. Dairy, Produce, Bakery"
+                />
               </div>
               <div className="form-row">
                 <div className="form-group">
