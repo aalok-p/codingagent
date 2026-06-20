@@ -7,9 +7,7 @@ services:
     dockerfilePath: ./backend/Dockerfile
     envVars:
       - key: DATABASE_URL
-        fromDatabase:
-          name: grocery-db
-          property: connectionString
+        sync: false
       - key: SECRET_KEY
         generateValue: true
       - key: ALGORITHM
@@ -19,15 +17,7 @@ services:
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: CORS_ORIGINS
-        value: https://grocery-inventory-order-management.vercel.app
+        sync: false
       - key: RUN_SEED
         value: "true"
     healthCheckPath: /health
-
-databases:
-  - name: grocery-db
-    plan: free
-    region: oregon
-    ipAllowList:
-      - source: 0.0.0.0/0
-        description: everywhere
