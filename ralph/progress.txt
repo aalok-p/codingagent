@@ -1,4 +1,5 @@
 ## Codebase Patterns
+- Analytics queries use SQLAlchemy `func.sum`, `func.count`, `func.coalesce` for aggregation scoped to `seller_id`
 - Frontend is plain React 19 + Vite + React Router v7 (JSX files, no TypeScript, no Tailwind)
 - API modules use separate Axios instances with localStorage-based JWT interceptor
 - Toast system via ToastContext + ToastProvider; use `const toast = useToast()` and call `toast(msg)` or `toast(msg, 'error')`
@@ -23,4 +24,14 @@
   - Buyer header actions should use a flex container for multiple action buttons (cart + nav links)
   - ESLint + Vite build passed without issues — no TypeScript checking needed for this project
   - Complaint form modal is placeholder UI — will need to POST to /complaints when backend endpoint is built (US-013)
+---
+## [Sat Jun 20 2026] - US-011
+- Implemented GET /seller/analytics endpoint returning total_products_listed, total_units_sold, total_revenue, low_stock_products
+- Created app/schemas/seller.py with SellerAnalyticsResponse and LowStockProduct schemas
+- Created app/routers/seller.py with analytics query using SQLAlchemy aggregation (func.sum, func.count, func.coalesce)
+- Registered seller router in app/main.py
+- **Learnings for future iterations:**
+  - New routers need to be registered in both the import and include_router sections of main.py
+  - Use `func.coalesce` to avoid None results from sum/count aggregations on empty tables
+  - The `/seller` prefix pattern is established for seller-specific endpoints
 ---
