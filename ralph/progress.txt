@@ -1,4 +1,6 @@
 ## Codebase Patterns
+- Alembic env.py must override `sqlalchemy.url` from DATABASE_URL env var for Docker/CI compatibility
+- Backend Dockerfile uses ENTRYPOINT with shell script that runs `alembic upgrade head` then `exec uvicorn`
 - Analytics queries use SQLAlchemy `func.sum`, `func.count`, `func.coalesce` for aggregation scoped to `seller_id`
 - Frontend is plain React 19 + Vite + React Router v7 (JSX files, no TypeScript, no Tailwind)
 - API modules use separate Axios instances with localStorage-based JWT interceptor
@@ -49,7 +51,24 @@
   - When adding new seller pages, add the nav link in both Products.jsx and Analytics.jsx headers
   - The `seller-header` + `seller-nav` CSS classes are shared between seller pages
   - No TypeScript typecheck needed for this project (plain JSX + Vite)
-   - Manual browser verification needed for UI pages
+- Manual browser verification needed for UI pages
+---
+## [Sat Jun 20 2026] - US-015
+- Docker containerization verified and enhanced
+- Fixed alembic/env.py to read DATABASE_URL from environment so migrations work in Docker (where host is "db", not "localhost")
+- Created backend/entrypoint.sh that runs `alembic upgrade head` then starts uvicorn — ensures DB schema is applied on container startup
+- Updated backend/Dockerfile to use ENTRYPOINT with entrypoint.sh
+- Added VITE_API_URL build ARG to frontend/Dockerfile so API URL can be configured at build time
+- Enhanced backend/.dockerignore with .mypy_cache, .pytest_cache, *.egg-info, .DS_Store
+- Enhanced frontend/.dockerignore with .env, .DS_Store, *.local
+- docker-compose.yml, volume, named volume, env_file pattern all already existed and were verified correct
+- Frontend build and lint pass clean
+- **Learnings for future iterations:**
+  - Dockerfiles, .dockerignore, and docker-compose.yml already existed for this project — US-015 was mostly verifying and hardening existing setup
+  - alembic.ini has hardcoded `sqlalchemy.url` — must override in env.py from DATABASE_URL env var for Docker/CI environments
+  - The entrypoint pattern (shell script that runs migrations then exec uvicorn) is essential for container reliability
+  - backend/.env is gitignored AND excluded from Docker build via .dockerignore — users must copy .env.example to .env before docker-compose up
+  - docker-compose.yml overrides DATABASE_URL via environment in the backend service, which takes precedence over env_file
 ---
 ## [Sat Jun 20 2026] - US-013
 - Implemented complaints API with 3 endpoints
