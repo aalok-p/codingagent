@@ -1,4 +1,11 @@
 ## Codebase Patterns
+- Cart state management: CartContext + CartProvider in `src/context/`, same pattern as Toast system (context in one file, provider in another)
+- Buyer pages in `src/pages/buyer/` directory
+- Product category filter pattern: derive unique categories from product data via useMemo, render as horizontal scrollable chips, active state toggles filter
+- Search filter pattern: local state + useMemo to filter products by name
+- Product card grid: CSS Grid with `auto-fill, minmax(240px, 1fr)` for responsive layout
+- ESLint: react-hooks/exhaustive-deps warns about stable callbacks (like toast) in useEffect deps — safe to add them since they're stable references
+
 - Frontend API modules follow pattern: create file in `src/api/`, export functions using shared axios instance with interceptors for auth token
 - Toast system: ToastContext + useToast hook in `src/components/Toast.jsx`, ToastProvider in `src/components/ToastProvider.jsx`, wraps app in App.jsx
 - Product API uses `src/api/products.js` with axios interceptor to auto-attach Bearer token from localStorage
@@ -107,5 +114,49 @@
   - Toast context and provider must be in separate files from the hook/context to satisfy `react-refresh/only-export-components`
   - Product API module pattern: create shared axios instance per module, use interceptor to attach Bearer token
   - Modal pattern: overlay div with onClick close, content div with stopPropagation, form groups for inputs, modal-actions for buttons
-  - Manual browser verification needed to test full product CRUD flow (requires running backend + frontend)
+   - Manual browser verification needed to test full product CRUD flow (requires running backend + frontend)
+---
+
+## [Sat Jun 20 2026] - US-007
+- Implemented buyer product browsing page with search bar, category chips, product card grid, and add-to-cart button
+- Added `category` column to Product model (backend) with migration 003
+- Updated Product create/update/response schemas to include category
+- Updated seller Products page to show category input and table column
+- Created CartContext + CartProvider for shared cart state across buyer pages
+- Added cart icon in header with dynamic badge count
+- Added CSS for: buyer layout, search bar, category chips, product grid, product cards, cart badge
+- Wired up /buyer/products route in App.jsx with CartProvider wrapper
+- **Learnings for future iterations:**
+  - Product categories are derived from product data via useMemo — no separate API needed
+  - Cart state lives inside CartProvider which wraps the /buyer/products route
+  - Adding a nullable string column in SQLAlchemy with migration is straightforward; tag it as Mapped[str | None] and nullable=True
+  - ESLint react-hooks/exhaustive-deps: adding a stable callback (useToast/useCart return values wrapped in useCallback) to deps array resolves the warning without causing re-runs
+  - Manual browser verification needed to test full product browsing flow (requires running backend + frontend with seed data)
+---
+
+## [Sat Jun 20 2026] - US-009 / US-008
+- Implemented order placement backend: POST /orders (buyer only)
+  - Auto-onboards buyer as Customer if not already one
+  - Validates stock availability for each item, rejects with specific error if insufficient
+  - Auto-calculates total amount from current product prices
+  - Atomically reduces stock on order creation
+  - Returns order with items, names, and total
+- Added GET /orders and GET /orders/{id} for order history and detail views
+- Created app/schemas/order.py with OrderCreate, OrderResponse, OrderItemResponse schemas
+- Created app/routers/orders.py with POST/GET endpoints
+- Implemented cart drawer UI: slides out from right, shows items with qty controls, line totals, grand total
+- Cart drawer has quantity +/- buttons and remove button per item
+- Place Order button in cart drawer: calls POST /orders API, shows toast on success/error
+- Successful order clears cart and shows confirmation toast
+- Created src/api/orders.js with axios interceptor pattern matching products.js
+- Added cartTotal computed value to CartProvider
+- Files created: backend/app/schemas/order.py, backend/app/routers/orders.py, frontend/src/api/orders.js, frontend/src/pages/buyer/CartDrawer.jsx
+- Files modified: backend/app/main.py, backend/app/schemas/__init__.py, frontend/src/App.css, frontend/src/context/CartProvider.jsx, frontend/src/pages/buyer/Products.jsx
+- **Learnings for future iterations:**
+  - Order placement uses a small `_ItemData` helper class instead of dicts to satisfy mypy type checking
+  - Customer auto-onboarding copies full_name, email, phone from User — ensure User.phone is never None (or has default)
+  - Stock deduction happens after order creation inside the same db transaction (flush then commit)
+  - Cart drawer uses overlay + slide-in pattern matching modal overlay but with transform instead of display toggle
+  - For merge conflicts, use `db.flush()` before creating dependent records to get generated IDs without committing
+  - Manual browser verification needed to test full order flow (requires running backend + frontend with seed data)
 ---
