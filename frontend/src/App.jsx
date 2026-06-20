@@ -4,6 +4,8 @@ import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import RolePicker from './pages/RolePicker';
+import SellerProducts from './pages/seller/Products';
+import { ToastProvider } from './components/ToastProvider';
 import './App.css';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
@@ -19,28 +21,30 @@ function ProtectedRoute({ children, requiredRole }) {
 function App() {
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/role-picker" element={<RolePicker />} />
-        <Route
-          path="/seller/products"
-          element={
-            <ProtectedRoute requiredRole="seller">
-              <h1>Seller Products (coming soon)</h1>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/buyer/products"
-          element={
-            <ProtectedRoute requiredRole="buyer">
-              <h1>Buyer Products (coming soon)</h1>
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
+      <ToastProvider>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/role-picker" element={<RolePicker />} />
+          <Route
+            path="/seller/products"
+            element={
+              <ProtectedRoute requiredRole="seller">
+                <SellerProducts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/buyer/products"
+            element={
+              <ProtectedRoute requiredRole="buyer">
+                <h1>Buyer Products (coming soon)</h1>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </ToastProvider>
     </GoogleOAuthProvider>
   );
 }

@@ -1,0 +1,267 @@
+{
+  "project": "Grocery Inventory & Order Management System",
+  "branchName": "ralph/grocery-inventory-order-management",
+  "description": "Full-stack dual-role grocery inventory and order management platform — sellers list products, buyers purchase them. React frontend, FastAPI backend, PostgreSQL, Docker Compose, deployed on Render + Vercel.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Database schema and migrations",
+      "description": "As a developer, I need all database tables created so the application can persist users, products, customers, orders, order items, and complaints.",
+      "acceptanceCriteria": [
+        "Create users table: id, full_name, email, phone, password_hash (nullable), google_id (nullable), role (buyer/seller), created_at",
+        "Create products table: id, name, sku (unique), sui_number (unique random), price, quantity, seller_id (FK to users), created_at, updated_at",
+        "Create customers table: id, user_id (FK to users, unique), full_name, email (unique), phone, created_at",
+        "Create orders table: id, customer_id (FK to customers), total_amount, status, created_at",
+        "Create order_items table: id, order_id (FK to orders), product_id (FK to products), quantity, unit_price, subtotal",
+        "Create complaints table: id, order_item_id (FK to order_items), customer_id (FK to customers), product_id (FK to products), message, status (open/resolved), created_at",
+        "All migrations run successfully",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Email/password authentication (backend)",
+      "description": "As a developer, I need email/password signup and login endpoints so users can authenticate with traditional credentials.",
+      "acceptanceCriteria": [
+        "POST /auth/signup accepts full_name, email, phone, password, role; validates unique email; hashes password with bcrypt; returns JWT",
+        "POST /auth/login accepts email, password; verifies credentials; returns JWT with user_id, role",
+        "Password strength validation (min 8 chars)",
+        "Proper error messages for duplicate email and invalid credentials",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Google OAuth authentication (backend)",
+      "description": "As a developer, I need Google OAuth endpoints so users can sign in with their Gmail account.",
+      "acceptanceCriteria": [
+        "POST /auth/google accepts Google ID token; verifies with Google; if user exists by google_id, issue JWT; if new, create user with role selection pending",
+        "PATCH /auth/role accepts role (buyer/seller) for first-time OAuth users; updates user record",
+        "JWT contains same payload structure as email/password auth",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Login and landing page (frontend)",
+      "description": "As a user, I want a landing page with two role cards and a login screen supporting both email/password and Google OAuth so I can sign in conveniently.",
+      "acceptanceCriteria": [
+        "Landing page shows two large cards: 'I am a Buyer' and 'I am a Seller'",
+        "Clicking a card navigates to login screen pre-selected for that role",
+        "Login screen has email + password text fields",
+        "Login screen has Sign in with Google button",
+        "Login screen has link to signup form",
+        "Signup form collects: full name, email, phone, password, role (pre-selected)",
+        "Google OAuth flow redirects to Google, then back with role selection on first login",
+        "Form validation with inline error messages",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Product CRUD (backend)",
+      "description": "As a seller, I want to create, read, update, and delete my products so I can manage my inventory.",
+      "acceptanceCriteria": [
+        "POST /products — seller only; accepts name, sku, price, quantity; auto-generates unique random SUI number; auto-links seller_id from JWT",
+        "GET /products — returns all products for buyers; returns only seller's products for sellers",
+        "GET /products/{id} — returns product by ID",
+        "PUT /products/{id} — seller only, own products only; updates allowed fields",
+        "DELETE /products/{id} — seller only, own products only",
+        "SUI number is a unique random integer (8-12 digits)",
+        "SKU uniqueness enforced",
+        "Proper error handling and HTTP status codes",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Product management UI (frontend)",
+      "description": "As a seller, I want a product management page in my dashboard so I can add, edit, and delete my products.",
+      "acceptanceCriteria": [
+        "Seller dashboard has Products section with table/grid of own products",
+        "Add Product button opens form/modal with fields: name, SKU, price, quantity",
+        "SUI number auto-generated and shown read-only after creation",
+        "Edit button opens pre-filled form for each product",
+        "Delete button shows confirmation dialog before deleting",
+        "Stock badge colors: green > 10, yellow <= 10, red <= 5",
+        "Success/error toasts for all actions",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Product grid and search (frontend)",
+      "description": "As a buyer, I want to browse all products with a search bar and category filters so I can find items to purchase.",
+      "acceptanceCriteria": [
+        "Product grid with cards showing name, price, stock indicator, add button",
+        "Search bar filters products by name",
+        "Category chips for horizontal scrollable filtering",
+        "Cart icon in header with badge showing item count",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Cart drawer and order placement UI (frontend)",
+      "description": "As a buyer, I want a cart drawer that shows my selected items and a Place Order button so I can complete my purchase.",
+      "acceptanceCriteria": [
+        "Cart drawer slides out showing items, quantities, line totals, grand total",
+        "Place Order button in cart drawer",
+        "Cart icon in header updates badge count as items are added/removed",
+        "Successful order shows confirmation and clears cart",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Order placement (backend)",
+      "description": "As a buyer, I want to place an order so my selected items are purchased and stock is updated.",
+      "acceptanceCriteria": [
+        "POST /orders — buyer only; accepts list of {product_id, quantity}; validates stock availability",
+        "Auto-calculates total amount from product prices and quantities",
+        "Automatically reduces stock for each product atomically",
+        "Auto-onboards buyer as customer if not already a customer",
+        "Returns order details with items and total",
+        "Error if stock insufficient for any item — no partial order created",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Order history UI (frontend)",
+      "description": "As a buyer, I want to view my past orders with status badges so I can track my purchases.",
+      "acceptanceCriteria": [
+        "Order history page lists all past orders",
+        "Each order shows: date, items, total, status badge",
+        "Click order to expand/show detail",
+        "File Complaint button on past order items",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Seller analytics API (backend)",
+      "description": "As a developer, I need a seller analytics endpoint so the dashboard can display performance metrics.",
+      "acceptanceCriteria": [
+        "GET /seller/analytics returns: total_products_listed, total_units_sold, total_revenue, low_stock_products (qty <= 5)",
+        "Results scoped to authenticated seller",
+        "Typecheck passes"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Seller analytics dashboard (frontend)",
+      "description": "As a seller, I want an analytics dashboard with stat cards so I can see my performance at a glance.",
+      "acceptanceCriteria": [
+        "Four stat cards: Products Listed, Units Sold, Revenue, Low Stock",
+        "Low stock products listed with name and quantity",
+        "Data fetched from /seller/analytics endpoint",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Complaints API (backend)",
+      "description": "As a developer, I need complaints endpoints so buyers can file issues and sellers can resolve them.",
+      "acceptanceCriteria": [
+        "POST /complaints — buyer only; accepts order_item_id, message; linked to product and customer",
+        "GET /seller/complaints — returns complaints on seller's products with product name, customer name, message, status",
+        "PATCH /complaints/{id}/resolve — seller only; marks complaint as resolved",
+        "Typecheck passes"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Complaints UI (frontend)",
+      "description": "As a buyer, I want to file complaints on orders; as a seller, I want to view and resolve complaints.",
+      "acceptanceCriteria": [
+        "Buyers see File Complaint button on past order items — clicking opens a form to submit message",
+        "Sellers see complaints panel showing: product name, customer name, message, status badge",
+        "Resolve button on open complaints — clicking marks as resolved and updates UI",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Docker containerization",
+      "description": "As a developer, I want the entire system containerized so it runs consistently across environments.",
+      "acceptanceCriteria": [
+        "Backend Dockerfile using slim Python image",
+        "Frontend Dockerfile with multi-stage build and nginx for production",
+        ".dockerignore files for backend and frontend",
+        "docker-compose.yml with frontend, backend, postgres services",
+        "Named volume for PostgreSQL data persistence",
+        "Environment variables via .env file (no hardcoded credentials)",
+        "docker-compose up starts all services successfully",
+        "Typecheck passes"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Deployment to Render and Vercel",
+      "description": "As a developer, I want the backend on Render and frontend on Vercel so the system is publicly accessible.",
+      "acceptanceCriteria": [
+        "Backend Docker image deployed to Render with env vars configured",
+        "Frontend deployed to Vercel pointing to Render backend URL",
+        "CORS configured for frontend domain",
+        "Both URLs publicly accessible",
+        "End-to-end flow works on deployed URLs"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
