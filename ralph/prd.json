@@ -260,7 +260,7 @@
         "End-to-end flow works on deployed URLs"
       ],
       "priority": 16,
-      "passes": false,
+      "passes": true,
       "notes": ""
     }
   ]
