@@ -1,162 +1,26 @@
 ## Codebase Patterns
-- Cart state management: CartContext + CartProvider in `src/context/`, same pattern as Toast system (context in one file, provider in another)
-- Buyer pages in `src/pages/buyer/` directory
-- Product category filter pattern: derive unique categories from product data via useMemo, render as horizontal scrollable chips, active state toggles filter
-- Search filter pattern: local state + useMemo to filter products by name
-- Product card grid: CSS Grid with `auto-fill, minmax(240px, 1fr)` for responsive layout
-- ESLint: react-hooks/exhaustive-deps warns about stable callbacks (like toast) in useEffect deps — safe to add them since they're stable references
+- Frontend is plain React 19 + Vite + React Router v7 (JSX files, no TypeScript, no Tailwind)
+- API modules use separate Axios instances with localStorage-based JWT interceptor
+- Toast system via ToastContext + ToastProvider; use `const toast = useToast()` and call `toast(msg)` or `toast(msg, 'error')`
+- Styling is custom CSS in App.css with CSS custom properties and `@media (prefers-color-scheme: dark)` for dark mode
+- Auth state in localStorage keys: `token`, `userId`, `role`
+- Protected routes via `<ProtectedRoute>` wrapper in App.jsx reading localStorage
+- All CSS class patterns: `.btn-primary`, `.btn-small`, `.btn-secondary`, `.btn-icon`, `.modal-overlay`, `.modal`, `.modal-actions`, `.form-group`, `.empty-state`, `.page-loading`, `stock-badge`/`stock-high`/`stock-medium`/`stock-low`
+- Backend orders already return items with `product_name` in GET /orders response
 
-- Frontend API modules follow pattern: create file in `src/api/`, export functions using shared axios instance with interceptors for auth token
-- Toast system: ToastContext + useToast hook in `src/components/Toast.jsx`, ToastProvider in `src/components/ToastProvider.jsx`, wraps app in App.jsx
-- Product API uses `src/api/products.js` with axios interceptor to auto-attach Bearer token from localStorage
-- Modal pattern: overlay + modal div with stopPropagation, form inside modal, close on overlay click
-- Stock badge CSS classes: stock-high (green, >10), stock-medium (yellow, 6-10), stock-low (red, <=5)
-- Frontend pages in `src/pages/` directory, subdirectories per role (e.g. `src/pages/seller/`)
-- ESLint rules enforced: react-refresh/only-export-components (separate context from component), react-hooks/set-state-in-effect (no setState synchronously in useEffect), react-hooks/refs (no ref.current assignment during render)
-- Use `app/utils/security.py` for JWT token creation and password hashing/verification
-- Use `app/schemas/` directory for Pydantic request/response models
-- Auth routes use `/auth` prefix via APIRouter, registered in main.py
-- Password validation uses Pydantic `@field_validator` on the schema class
-- JWT payload: `{"sub": str(user_id), "role": user_role, "exp": expires}`
-- TokenResponse schema includes access_token, token_type, user_id, role
-- Use `app/dependencies.py` for shared FastAPI dependencies (e.g., `get_current_user`)
-- Protect routes with `get_current_user` dependency from `app/dependencies.py`
-- Google OAuth new users get `role="pending"` until they choose buyer/seller via PATCH /auth/role
-- CORS middleware configured in `app/main.py` with broad defaults
-- Frontend: `src/api/auth.js` for all auth API calls; `setAuthToken()` to configure axios default header
-- Frontend: role is passed as query param `/login?role=buyer|seller` to pre-select in forms
-- Frontend: after login/signup, store token/userId/role in localStorage; redirect based on role
-- Frontend: Google OAuth via `@react-oauth/google`; client ID from `VITE_GOOGLE_CLIENT_ID` env var
-- Frontend: role-pending users (Google OAuth first login) redirected to `/role-picker` page
-- Product CRUD routes use `/products` prefix via APIRouter in `app/routers/products.py`
-- New routers follow pattern: create APIRouter in `app/routers/`, register via `app.include_router()` in `app/main.py`
-- Role-based access control: check `current_user.role` in endpoint logic for seller-only or buyer-only routes
-- SUI number generation: `random.randint(10**7, 10**12 - 1)` with uniqueness check against DB
-
-## [Sat Jun 20 2026] - US-002
-- Implemented email/password authentication backend: POST /auth/signup and POST /auth/login
-- Created Pydantic schemas (app/schemas/auth.py) with EmailStr and password strength validator
-- Created security utilities (app/utils/security.py) with bcrypt hashing and JWT creation
-- Created auth router (app/routers/auth.py) with signup (201) and login endpoints
-- Registered router in app/main.py
-- Added mypy for type checking (installed in venv)
+## [Sat Jun 20 2026] - US-010
+- Implemented buyer order history page with expandable order cards
+- Each order shows: order ID, date, item count, total, status badge
+- Click to expand shows order items with product name, qty, unit price, subtotal
+- File Complaint button on each order item opens a complaint form modal
+- Added "My Orders" navigation link in buyer header
+- Added getOrders() and getOrder() to orders API module
+- Added /buyer/orders route in App.jsx
+- Added CSS for orders page, status badges, complaint form
 - **Learnings for future iterations:**
-  - Patterns discovered: Pydantic schema directory under app/schemas/, JWT utils under app/utils/
-  - Gotchas: pydantic[email] extra needs email-validator package explicitly in some installs
-  - The project uses SQLAlchemy 2.0 with Mapped types; alembic for migrations
-  - Type checking passes with `mypy backend/app --ignore-missing-imports`
----
-
-## [Sat Jun 20 2026] - US-003
-- Implemented Google OAuth authentication backend: POST /auth/google, PATCH /auth/role
-- Added verify_google_token() and decode_token() to app/utils/security.py
-- Created app/dependencies.py with get_current_user dependency using HTTPBearer
-- Added GoogleAuthResponse, GoogleLoginRequest, RoleUpdateRequest schemas
-- Made User.phone nullable and added 'pending' to user_role enum
-- Created alembic migration 002_google_oauth_support.py
-- Added CORS middleware to app/main.py
-- Files changed: backend/app/main.py, backend/app/models/user.py, backend/app/routers/auth.py, backend/app/schemas/__init__.py, backend/app/schemas/auth.py, backend/app/utils/security.py, backend/app/dependencies.py (new), backend/alembic/versions/002_google_oauth_support.py (new)
-- **Learnings for future iterations:**
-  - Google OAuth flow: frontend sends id_token → backend verifies with google.oauth2 → creates user with role="pending" → frontend shows role picker → PATCH /auth/role sets the role
-  - When linking google_id to an existing email-matched user, remember to skip the user creation step
-  - The `login` endpoint checks `not user.password_hash` to reject OAuth-only users — keep this in mind if adding password-set flow later
-  - CORS middleware must be added before routers for proper header handling
-  - Alembic enum changes in PostgreSQL require `ALTER TYPE ... ADD VALUE` outside the normal op pattern
----
-
-## [Sat Jun 20 2026] - US-004
-- Implemented landing page with two role cards (Buyer/Seller) that navigate to login with role preselected
-- Created login page with email/password form, Google OAuth button, and link to signup
-- Created signup form with full_name, email, phone, password, and role toggle
-- Created role picker page for first-time Google OAuth users
-- Set up react-router-dom with routes: /, /login, /signup, /role-picker, and protected placeholder routes
-- Added API client (src/api/auth.js) with signup, login, googleLogin, updateRole functions
-- Styled auth pages with clean card layout, form validation, error banners, and dark mode support
-- Files created: frontend/src/api/auth.js, frontend/src/pages/Landing.jsx, frontend/src/pages/Login.jsx, frontend/src/pages/Signup.jsx, frontend/src/pages/RolePicker.jsx
-- Files modified: frontend/src/App.jsx, frontend/src/main.jsx, frontend/src/App.css, frontend/index.html, frontend/package.json, frontend/package-lock.json
-- **Learnings for future iterations:**
-  - Google OAuth token flow needs @react-oauth/google package; client ID from VITE_GOOGLE_CLIENT_ID env var
-  - GoogleOAuthProvider wraps the app inside BrowserRouter (can't be outside router)
-  - After auth, redirect logic depends on role: seller -> /seller/products, buyer -> /buyer/products
-  - For role_pending users (first Google login), redirect to /role-picker before granting access
-  - BrowserRouter must wrap App (where GoogleOAuthProvider lives) from main.jsx
-  - Manual browser verification needed to test full Google OAuth flow (requires real client ID)
----
-
-## [Sat Jun 20 2026] - US-005
-- Implemented Product CRUD backend API: POST, GET (list), GET (by ID), PUT, DELETE /products
-- Created `app/schemas/product.py` with ProductCreate, ProductUpdate, ProductResponse schemas and SUI number generator
-- Created `app/routers/products.py` with role-based access (sellers manage own products, buyers browse all)
-- Registered products router in `app/main.py` and exported schemas in `app/schemas/__init__.py`
-- SUI number: random 8-12 digit integer with uniqueness loop
-- Role enforcement: POST/PUT/DELETE require `seller` role; GET returns different results per role
-- Files created: backend/app/schemas/product.py, backend/app/routers/products.py
-- Files modified: backend/app/main.py, backend/app/schemas/__init__.py
-- **Learnings for future iterations:**
-  - Product CRUD follows same pattern as auth router: APIRouter + get_current_user + get_db
-  - For update endpoints, use `req.model_dump(exclude_unset=True)` to only apply provided fields
-  - Role-based filtering for list endpoint: sellers see own, buyers see all
-  - SUI number uniqueness requires retry loop since it's random
-  - SKU uniqueness enforced separately at creation and update (check sku changed before conflict check)
----
-
-## [Sat Jun 20 2026] - US-006
-- Implemented seller product management UI: product table with stock badges, add/edit modal, delete confirmation dialog, toast notifications
-- Created `src/api/products.js` with axios interceptor for auth token, CRUD functions
-- Created `src/components/Toast.jsx` (context + hook) and `src/components/ToastProvider.jsx` — lightweight toast notification system
-- Created `src/pages/seller/Products.jsx` with full CRUD UI: product listing table, add/edit modal form, delete confirmation
-- Updated `src/App.jsx` to import SellerProducts and wrap app with ToastProvider
-- Added CSS in `src/App.css` for: product table, stock badges, modal overlay, modal form, toast notifications, empty state, loading state, action buttons
-- Stock badge thresholds: green >10, yellow 6-10, red <=5 (matching AC)
-- **Learnings for future iterations:**
-  - React 19 eslint rules are strict: `react-hooks/set-state-in-effect` prevents setState sync in useEffect; `react-hooks/refs` prevents ref.current assignment during render
-  - To avoid set-state-in-effect rule, structure effects with `.then()` callbacks for setState (async callbacks are fine)
-  - Toast context and provider must be in separate files from the hook/context to satisfy `react-refresh/only-export-components`
-  - Product API module pattern: create shared axios instance per module, use interceptor to attach Bearer token
-  - Modal pattern: overlay div with onClick close, content div with stopPropagation, form groups for inputs, modal-actions for buttons
-   - Manual browser verification needed to test full product CRUD flow (requires running backend + frontend)
----
-
-## [Sat Jun 20 2026] - US-007
-- Implemented buyer product browsing page with search bar, category chips, product card grid, and add-to-cart button
-- Added `category` column to Product model (backend) with migration 003
-- Updated Product create/update/response schemas to include category
-- Updated seller Products page to show category input and table column
-- Created CartContext + CartProvider for shared cart state across buyer pages
-- Added cart icon in header with dynamic badge count
-- Added CSS for: buyer layout, search bar, category chips, product grid, product cards, cart badge
-- Wired up /buyer/products route in App.jsx with CartProvider wrapper
-- **Learnings for future iterations:**
-  - Product categories are derived from product data via useMemo — no separate API needed
-  - Cart state lives inside CartProvider which wraps the /buyer/products route
-  - Adding a nullable string column in SQLAlchemy with migration is straightforward; tag it as Mapped[str | None] and nullable=True
-  - ESLint react-hooks/exhaustive-deps: adding a stable callback (useToast/useCart return values wrapped in useCallback) to deps array resolves the warning without causing re-runs
-  - Manual browser verification needed to test full product browsing flow (requires running backend + frontend with seed data)
----
-
-## [Sat Jun 20 2026] - US-009 / US-008
-- Implemented order placement backend: POST /orders (buyer only)
-  - Auto-onboards buyer as Customer if not already one
-  - Validates stock availability for each item, rejects with specific error if insufficient
-  - Auto-calculates total amount from current product prices
-  - Atomically reduces stock on order creation
-  - Returns order with items, names, and total
-- Added GET /orders and GET /orders/{id} for order history and detail views
-- Created app/schemas/order.py with OrderCreate, OrderResponse, OrderItemResponse schemas
-- Created app/routers/orders.py with POST/GET endpoints
-- Implemented cart drawer UI: slides out from right, shows items with qty controls, line totals, grand total
-- Cart drawer has quantity +/- buttons and remove button per item
-- Place Order button in cart drawer: calls POST /orders API, shows toast on success/error
-- Successful order clears cart and shows confirmation toast
-- Created src/api/orders.js with axios interceptor pattern matching products.js
-- Added cartTotal computed value to CartProvider
-- Files created: backend/app/schemas/order.py, backend/app/routers/orders.py, frontend/src/api/orders.js, frontend/src/pages/buyer/CartDrawer.jsx
-- Files modified: backend/app/main.py, backend/app/schemas/__init__.py, frontend/src/App.css, frontend/src/context/CartProvider.jsx, frontend/src/pages/buyer/Products.jsx
-- **Learnings for future iterations:**
-  - Order placement uses a small `_ItemData` helper class instead of dicts to satisfy mypy type checking
-  - Customer auto-onboarding copies full_name, email, phone from User — ensure User.phone is never None (or has default)
-  - Stock deduction happens after order creation inside the same db transaction (flush then commit)
-  - Cart drawer uses overlay + slide-in pattern matching modal overlay but with transform instead of display toggle
-  - For merge conflicts, use `db.flush()` before creating dependent records to get generated IDs without committing
-  - Manual browser verification needed to test full order flow (requires running backend + frontend with seed data)
+  - Status badge colors need 5 variants (pending, confirmed, shipped, delivered, cancelled) with dark mode support
+  - The orders API returns items with `product_name` field directly (not nested product object)
+  - Buyer header actions should use a flex container for multiple action buttons (cart + nav links)
+  - ESLint + Vite build passed without issues — no TypeScript checking needed for this project
+  - Complaint form modal is placeholder UI — will need to POST to /complaints when backend endpoint is built (US-013)
 ---

@@ -17,3 +17,13 @@ export async function placeOrder(items) {
   const res = await api.post('/orders', { items });
   return res.data;
 }
+
+export async function getOrders() {
+  const res = await api.get('/orders');
+  return res.data;
+}
+
+export async function getOrder(id) {
+  const res = await api.get(`/orders/${id}`);
+  return res.data;
+}

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getProducts } from '../../api/products';
 import { useCart } from '../../context/CartContext';
 import { useToast } from '../../components/Toast';
@@ -12,6 +13,7 @@ export default function BuyerProducts() {
   const [cartOpen, setCartOpen] = useState(false);
   const { addToCart, itemCount } = useCart();
   const toast = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     getProducts().then((data) => {
@@ -63,13 +65,18 @@ export default function BuyerProducts() {
     <div className="buyer-layout">
       <header className="buyer-header">
         <h2>Products</h2>
-        <button className="cart-btn" onClick={() => setCartOpen(true)}>
+        <div className="buyer-header-actions">
+          <button className="btn-link" onClick={() => navigate('/buyer/orders')}>
+            My Orders
+          </button>
+          <button className="cart-btn" onClick={() => setCartOpen(true)}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
             <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
           </svg>
           {itemCount > 0 && <span className="cart-badge">{itemCount}</span>}
         </button>
+        </div>
       </header>
 
       <div className="search-bar">

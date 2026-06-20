@@ -6,6 +6,7 @@ import Signup from './pages/Signup';
 import RolePicker from './pages/RolePicker';
 import SellerProducts from './pages/seller/Products';
 import BuyerProducts from './pages/buyer/Products';
+import BuyerOrders from './pages/buyer/Orders';
 import { ToastProvider } from './components/ToastProvider';
 import { CartProvider } from './context/CartProvider';
 import './App.css';
@@ -44,6 +45,14 @@ function App() {
                 <CartProvider>
                   <BuyerProducts />
                 </CartProvider>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/buyer/orders"
+            element={
+              <ProtectedRoute requiredRole="buyer">
+                <BuyerOrders />
               </ProtectedRoute>
             }
           />
