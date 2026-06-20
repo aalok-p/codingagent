@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import RolePicker from './pages/RolePicker';
 import SellerProducts from './pages/seller/Products';
+import SellerAnalytics from './pages/seller/Analytics';
 import BuyerProducts from './pages/buyer/Products';
 import BuyerOrders from './pages/buyer/Orders';
 import { ToastProvider } from './components/ToastProvider';
@@ -35,6 +36,14 @@ function App() {
             element={
               <ProtectedRoute requiredRole="seller">
                 <SellerProducts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/seller/analytics"
+            element={
+              <ProtectedRoute requiredRole="seller">
+                <SellerAnalytics />
               </ProtectedRoute>
             }
           />

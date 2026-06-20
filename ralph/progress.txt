@@ -34,4 +34,18 @@
   - New routers need to be registered in both the import and include_router sections of main.py
   - Use `func.coalesce` to avoid None results from sum/count aggregations on empty tables
   - The `/seller` prefix pattern is established for seller-specific endpoints
+  ---
+## [Sat Jun 20 2026] - US-012
+- Implemented seller analytics dashboard page with four stat cards (Products Listed, Units Sold, Revenue, Low Stock)
+- Created seller API module at src/api/seller.js with getAnalytics() following existing pattern
+- Created src/pages/seller/Analytics.jsx with stat cards grid and low stock products list
+- Added seller navigation header (Products / Analytics tabs) reused across Products.jsx and Analytics.jsx
+- Added /seller/analytics route in App.jsx
+- Added CSS for stat cards, low stock list, seller header navigation with dark mode support
+- **Learnings for future iterations:**
+  - Seller navigation pattern is now established — both Products and Analytics pages share the same header/nav structure
+  - When adding new seller pages, add the nav link in both Products.jsx and Analytics.jsx headers
+  - The `seller-header` + `seller-nav` CSS classes are shared between seller pages
+  - No TypeScript typecheck needed for this project (plain JSX + Vite)
+  - Manual browser verification needed for UI pages
 ---

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { getProducts, createProduct, updateProduct, deleteProduct } from '../../api/products';
 import { useToast } from '../../components/Toast';
 
@@ -107,11 +108,15 @@ export default function SellerProducts() {
 
   return (
     <div className="seller-products">
-      <div className="seller-products-header">
+      <div className="seller-header">
         <h2>My Products</h2>
-        <button className="btn-primary btn-small" onClick={openAdd}>
-          + Add Product
-        </button>
+        <div className="seller-nav">
+          <Link to="/seller/products" className="btn-link btn-link-active">Products</Link>
+          <Link to="/seller/analytics" className="btn-link">Analytics</Link>
+          <button className="btn-primary btn-small" onClick={openAdd}>
+            + Add Product
+          </button>
+        </div>
       </div>
 
       {products.length === 0 ? (
