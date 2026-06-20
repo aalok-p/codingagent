@@ -28,8 +28,27 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class GoogleLoginRequest(BaseModel):
+    id_token: str
+
+
+class RoleUpdateRequest(BaseModel):
+    role: str
+
+    @field_validator("role")
+    @classmethod
+    def valid_role(cls, v: str) -> str:
+        if v not in ("buyer", "seller"):
+            raise ValueError("Role must be 'buyer' or 'seller'")
+        return v
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user_id: int
     role: str
+
+
+class GoogleAuthResponse(TokenResponse):
+    role_pending: bool = False
