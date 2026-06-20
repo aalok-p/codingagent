@@ -2,7 +2,7 @@ services:
   - type: web
     name: grocery-inventory-backend
     env: docker
-    repo: https://github.com/your-org/grocery-inventory
+    repo: https://github.com/aalok-p/codingagent
     branch: main
     dockerfilePath: ./backend/Dockerfile
     envVars:
@@ -19,7 +19,9 @@ services:
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: CORS_ORIGINS
-        value: https://grocery-inventory.vercel.app
+        value: https://grocery-inventory-order-management.vercel.app
+      - key: RUN_SEED
+        value: "true"
     healthCheckPath: /health
 
 databases:
